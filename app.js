@@ -74,6 +74,19 @@ function isLoggedIn(req,res,next){
     }
 }
 
+app.post('/post' , isLoggedIn ,async (req, res) => {
+    let user = await userModel.findOne({email: req.user.email});
+    let {content} = req.body;
+
+    let post = await postModel.create({
+        user: user._id,
+        content 
+    });
+
+    user.posts.push(post._id);
+    await user.save();
+    res.redirect('/profile');
+})
 
 app.listen(3000,()=>{
     console.log("server running");
