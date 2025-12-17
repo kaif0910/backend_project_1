@@ -20,7 +20,7 @@ app.get('/login',(req,res) => {
 })
 
 app.get('/profile', isLoggedIn ,async (req,res) => {
-    let user = await userModel.findOne({email: req.user.email})
+    let user = await userModel.findOne({email: req.user.email}).populate("posts");
     res.render("profile", {user});
 })
 
@@ -74,7 +74,7 @@ function isLoggedIn(req,res,next){ //middleware
     }
 }
 
-app.post('/post' , isLoggedIn ,async (req, res) => {
+app.post('/createpost' , isLoggedIn ,async (req, res) => {
     let user = await userModel.findOne({email: req.user.email});
     let {content} = req.body;
 
