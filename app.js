@@ -5,6 +5,8 @@ const postModel = require('./model/post');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const user = require('./model/user');
+const post = require('./model/post');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
@@ -17,6 +19,35 @@ app.get('/',(req,res) => {
 
 app.get('/login',(req,res) => {
     res.render("login");
+})
+
+app.get('/edit/:id',isLoggedIn,async (req,res) => {
+    let post = await postModel.findOne({_id: req.params.id}).populate("user");
+    res.render("edit",{post});
+})
+
+app.post("/update/:id",isLoggedIn,async (req,res) => {
+    let post = await postModel.findOneAndUpdate({_id: req.params.id},{content: req.body.content});
+    res.redirect("/profile");
+})
+
+app.post("/delete/:id",isLoggedIn,async (req,res) => {
+    let post = await postModel.findOneAndDelete({_id: req.params.id});
+    res.redirect("/profile");
+})
+
+
+
+app.get('/like/:id',isLoggedIn,async (req,res) => {
+    let post = await postModel.findOne({_id: req.params.id}).populate("user");
+    if(post.likes.indexOf(req.user.userid)=== -1){
+        post.likes.push(req.user.userid);
+    }
+    else{
+        post.likes.splice(post.likes.indexOf(req.user.userid),1);
+    }
+    await post.save();
+    res.redirect('/profile');
 })
 
 app.get('/profile', isLoggedIn ,async (req,res) => {
